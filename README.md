@@ -1,65 +1,216 @@
-# Phase 1 Project
+# Final Project Submission
 
-You've made it all the way through the first phase of this course - take a minute to celebrate your awesomeness!
+Please fill out:
+* Student name: 
+* Student pace: self paced / part time / full time
+* Scheduled project review date/time: 
+* Instructor name: 
+* Blog post URL:
 
-![awesome](https://raw.githubusercontent.com/learn-co-curriculum/dsc-phase-1-project/master/awesome.gif)
 
-Now you will put your new skills to use with a large end-of-Phase project! This project should take 20 to 30 hours to complete.
+# STUDENT NAME :MERCY MORAA ONDUSO
+#STUDENT PACE: PART TIME
+#SCHEDULED PROJECT REVIEW DATE: 09/11/2022
 
-## Project Overview
+expected-to-do:
+1. Load and read the data,
+2. Check for films that are doing well at the box office,
+3. Translate the findings into actionable insights
+have a pdf presentation for the heads of dept in Microsoft
 
-For this project, you will use exploratory data analysis to generate insights for a business stakeholder.
+# 1.0 Importing libraries
 
-### Business Problem
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+%matplotlib inline
+import numpy as np
 
-Microsoft sees all the big companies creating original video content and they want to get in on the fun. They have decided to create a new movie studio, but they don’t know anything about creating movies. You are charged with exploring what types of films are currently doing the best at the box office. You must then translate those findings into actionable insights that the head of Microsoft's new movie studio can use to help decide what type of films to create.
+# 1.1 Loading and reading datasets
 
-### The Data
+movie_titlebasic = pd.read_csv("E:/Data Science/EDA files/title.basics.csv")
+movie_titlebasic
 
-In the folder `zippedData` are movie datasets from:
+movie_gross = pd.read_csv("E:/Data Science/EDA files/bom.movie_gross.csv")
+movie_gross
 
-* [Box Office Mojo](https://www.boxofficemojo.com/)
-* [IMDB](https://www.imdb.com/)
-* [Rotten Tomatoes](https://www.rottentomatoes.com/)
-* [TheMovieDB](https://www.themoviedb.org/)
-* [The Numbers](https://www.the-numbers.com/)
+movie_titleratings = pd.read_csv("E:/Data Science/EDA files/title.ratings.csv")
+movie_titleratings
 
-It is up to you to decide what data from this to use and how to use it. If you want to make this more challenging, you can scrape websites or make API calls to get additional data. If you are feeling overwhelmed or behind (e.g. struggled with the Phase 1 Code Challenge), we recommend you use only the following data files:
+# 2.0 Data Understanding
 
-* imdb.title.basics
-* imdb.title.ratings
-* bom.movie_gross
+# 2.1 Dataframe Merging
 
-## Deliverables
+The two files: title.ratings.csv and title.basics.csv have a common column. The column is tconst. This column can help us narrow down our analysis to one dataframe instead of counterchecking from both datasets.
+I will use the pd.merge method
 
-There are three deliverables for this project:
+#merge titleratings and titlebasic using tconst
+movie_ratings = pd.merge(movie_titleratings, movie_titlebasic)
+movie_ratings.head()
 
-* A **GitHub repository**
-* A **Jupyter Notebook**
-* A **non-technical presentation**
+In the next step, I am merging the 3 datasets as one dataframe to have an easy time analysing the datasets. 
+In this case, the 'primary_title' column, in our already merged file, is the same as the 'title' column in the movie_gross dataset.
 
-Review the "Project Submission & Review" page in the "Milestones Instructions" topic for instructions on creating and submitting your deliverables. Refer to the rubric associated with this assignment for specifications describing high-quality deliverables.
 
-### Key Points
 
-* **Your analysis should yield three concrete business recommendations.** The ultimate purpose of exploratory analysis is not just to learn about the data, but to help an organization perform better. Explicitly relate your findings to business needs by recommending actions that you think the business (Microsoft) should take.
+movie_ratings_gross = movie_ratings.merge(movie_gross, left_on = 'primary_title', right_on = 'title')
+movie_ratings_gross.head()
 
-* **Communicating about your work well is extremely important.** Your ability to provide value to an organization - or to land a job there - is directly reliant on your ability to communicate with them about what you have done and why it is valuable. Create a storyline your audience (the head of Microsoft's new movie studio) can follow by walking them through the steps of your process, highlighting the most important points and skipping over the rest.
+movie_ratings_gross.tail()
 
-* **Use plenty of visualizations.** Visualizations are invaluable for exploring your data and making your findings accessible to a non-technical audience. Spotlight visuals in your presentation, but only ones that relate directly to your recommendations. Simple visuals are usually best (e.g. bar charts and line graphs), and don't forget to format them well (e.g. labels, titles).
+From the analysis above: using the head() and the tail() method, there is no criteria in which these datasets were arranged in.
 
-## Getting Started
+movie_ratings_gross.columns
 
-Please start by reviewing this assignment, the rubric at the bottom of it, and the "Project Submission & Review" page. If you have any questions, please ask your instructor ASAP.
+# 2.2 Dataframe Inspection
 
-Next, we recommend you check out [the Phase 1 Project Templates and Examples repo](https://github.com/learn-co-curriculum/dsc-project-template) and use the MVP template for your project.
+Checking the number of columns and rows in the dataset
 
-Alternatively, you can fork [the Phase 1 Project Repository](https://github.com/learn-co-curriculum/dsc-phase-1-project), clone it locally, and work in the `student.ipynb` file. Make sure to also add and commit a PDF of your presentation to your repository with a file name of `presentation.pdf`.
+movie_ratings_gross.shape
 
-## Project Submission and Review
+Next is checking the data types of the dataframes. As well as checking for missing values
 
-Review the "Project Submission & Review" page in the "Milestones Instructions" topic to learn how to submit your project and how it will be reviewed. Your project must pass review for you to progress to the next Phase.
+movie_ratings_gross.info()
 
-## Summary
+movie_ratings_gross['foreign_gross'] = pd.to_numeric(movie_ratings_gross['foreign_gross'], errors = 'ignore')
 
-This project will give you a valuable opportunity to develop your data science skills using real-world data. The end-of-phase projects are a critical part of the program because they give you a chance to bring together all the skills you've learned, apply them to realistic projects for a business stakeholder, practice communication skills, and get feedback to help you improve. You've got this!
+From the above information, the columns with missing values are: 'runtime_minutes','genres', 'studio', 'domestic_gross' and 'foreign_gross'.
+
+
+The 'genres' column is very sensitive since it will help in the final decision as to which type of movies Microsoft should start investing in. We cannot guess which genre a particular movie is in and so, dropping the null values in this column will help narrow down our analysis.
+
+The 'studio' column as well wil have minimal impact to our final analysis.
+
+
+# 3.0 Data Cleaning and Scrubbing
+
+movie_ratings_gross1 = movie_ratings_gross.drop(['runtime_minutes', 'studio'], axis = 1)
+movie_ratings_gross1.head()
+
+The 'original_title' , 'title' and the 'primary_title' column are the same. Only difference being that, in some instances the 'original_title' is written in the movies' original language and not English. 
+In conclusion of the columns overall analysis, there are columns that are better off dropped than maintained from this point onwards.
+
+movie_ratings_gross2 = movie_ratings_gross1.drop(['original_title','year', 'primary_title', 'title'], axis =1)
+movie_ratings_gross2.head()
+
+# 3.1 Checking for missing values in columns
+
+movie_ratings_gross2['foreign_gross'].isnull().sum()
+
+movie_ratings_gross2['foreign_gross'].nunique()
+
+There are 1195 null values in the column 'foreign_gross'. So it will be difficult to replace the null values with median, mean and mode.
+
+movie_ratings_gross2.describe()
+
+# 3.2 Checking for duplicates
+
+movie_ratings_gross2.duplicated().sum()
+
+From the analysis above, there are no duplicates in our dataset. So, we proceed to the analytical part of it where the missing values for domestic_gross can be replaced by either the mean and median. 
+
+# 3.3 Statistical aggregation
+
+movie_ratings_gross2['domestic_gross'].mean()
+
+The mean of the domestic_gross is high due to the number of movies that generate exceedingly more revenues as compared to other movies. So we cannot use the mean to replace the null values in the column
+
+movie_ratings_gross2['domestic_gross'].mode()
+
+The mode of the domestic_gross can be an option, if there is need to replace the null values with the necessary aggregate.
+
+movie_ratings_gross2['domestic_gross'].median()
+
+movie_ratings_gross2.isnull().sum()
+
+movie_ratings_gross2['domestic_gross'] = movie_ratings_gross['domestic_gross'].fillna(13000).astype(float)
+
+The number of missing values is less and we can afford to either replace it using mode or median. The other option is 
+dropping the missing values and using the remaining dataset in data analysis.
+
+movie_ratings_gross2.shape
+
+movie_ratings_gross2.isna().sum()
+
+Next, checking for outliers in our dataset. Let us sort our domestic_gross col in descending order first
+First, Lets fill the missing values in the domestic_gross column using the m
+
+# 3.4 Sorting data columns
+
+rating_genres = movie_ratings_gross2.sort_values('domestic_gross' , ascending = False)
+rating_genres
+
+# 3.5 Use IQR to check for the outliers
+
+Q1 = np.percentile(rating_genres['domestic_gross'], 25,
+                   interpolation = 'midpoint')
+ 
+Q3 = np.percentile(rating_genres['domestic_gross'], 75,
+                   interpolation = 'midpoint')
+IQR = Q3 - Q1
+lower = (Q1 - 1.5*IQR)
+lower
+
+The outliers are extreme. Hence will be ignored
+
+rating_genres1 = rating_genres[rating_genres['averagerating']> 5 ]
+rating_genres1.head()
+
+rating_genres1.tail()
+
+rating_genres2 = rating_genres1[rating_genres1['domestic_gross'] >= 200000]
+rating_genres2.head()
+
+rating_genres2.tail()
+
+rating_genres2.shape
+
+From the above analysis, looking at the averagerating and the domestic_gross, we can conclude that the most watched and liked genres fall in either categories: action, adventure, Sci-Fi, animation, comedy, drama , documentary or fantasy.Splitting the genres into categories
+
+rating_genres2 = rating_genres.copy()
+rating_genres2['genres'] = rating_genres2['genres'].str.split(',').copy()
+rating_genres2 = rating_genres2.explode('genres')
+rating_genres2['genres'].unique()
+
+# 4.0 Data Visualization
+
+# 4.1 Plotting the categories of genres
+
+rating_genres2.groupby('genres').size().plot(kind='bar')
+
+# 4.2 Comparing the domestic gross and the genres using a barplot
+
+fig, ax = plt.subplots(figsize = (10,6))
+ax = sns.barplot(x = 'genres', y = 'domestic_gross', data = rating_genres2)
+plt.xticks(rotation = 60, fontsize = 12)
+ax.set_xlabel('genres', fontsize = 15)
+ax.set_ylabel('domestic_gross', fontsize = 15)
+ax.set_title('Domestic Gross vs Genres', fontsize = 25);
+
+From the bar graph above, the leading 5 genres in terms of domestic gross are: Sci-fi, Adventure, Animation, Action and Fantasy
+
+# 4.3 Comparing Average Rating and Domestic Gross using a barplot
+
+plt.figure(figsize = (8, 6))
+x = rating_genres2.averagerating
+y = rating_genres2.domestic_gross
+plt.bar(x,y, color = 'green')
+plt.xlabel('averagerating')
+plt.ylabel('Domestic gross')
+plt.title('Domestic Gross vs Average Rating')
+plt.show();
+
+From the bar graph above, the higher the Average rating, the more the domestic gross and the lower the Average rating the lesser the domestic gross
+
+# 4.4  Comparing the genres and domestic gross using a scatterplot
+
+sns.catplot(data=rating_genres2, x=rating_genres2['domestic_gross'], y= rating_genres2['genres']);
+
+From the above scatter plot, the leading 5 genres in the box office are: Action, Adventure, Sci-Fi, Fantasy and Animation 
+
+# 5. Recommendation
+
+From the above analysis, I would advise the new head of Microsoft's studio to invest in producing movies that are expected to have good returns to the company. The genres doing well are : Action, Adventure, Sci-Fi, Animation, Fantasy, Comedy, Thriller and Comedy.
+A combination of either of the top genres is also recommended as is seen in the datasets provided. 
+The genres to extremely avoid are those with the least returns in terms of domestic gross. The least in returns are: News, War, Western, Musical and Music
